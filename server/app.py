@@ -17,11 +17,39 @@ db.init_app(app)
 api = Api(app)
 
 class Plants(Resource):
-    pass
+
+    def get(self):
+        plants = [plant.to_dict() for plant in Plant.query.all()]
+        
+        return make_response(jsonify(plants), 200)
+    
+    def post(self):
+        headers = {"Content-Type": "application/json"}
+        data = request.get_json()
+        new_plant = Plant(
+            name=data.get('name'),
+            image=data.get('image'),
+            price=data.get('price')
+        )
+        db.session.add(new_plant)
+        db.session.commit()
+
+
+api.add_resource(Plants, '/plants')
+
 
 class PlantByID(Resource):
-    pass
-        
+    
+    def get(self, id):
+        plant = Plant.query.filter_by(id=id).first().to_dict()
+
+        return make_response(plant, 200)
+
+api.add_resource(PlantByID, '/plants/<int:id>')
+
+'''Paused at POST'''
+
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
